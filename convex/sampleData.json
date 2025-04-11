@@ -1,0 +1,12 @@
+[
+    {
+       "name":"Bensoul | The Bensoul Experience",
+        "description":"The Bensoul Experience is a 5-track EP that showcases the artist's unique sound and style. The EP features a mix of Afrobeat, R&B, and soul influences, with each track telling a different story. The production is top-notch, with lush instrumentation and smooth vocals that draw you in from the first note. Bensoul's lyrics are introspective and relatable, touching on themes of love, heartbreak, and self-discovery. This EP is a must-listen for fans of contemporary African music and anyone looking for a fresh sound.",
+        "price":1000,
+        "totalTickets":100,
+        "location":"Nairobi, Kenya",
+        "date": 20251201,
+        "userId":"0x1234567890abcdef1234567890abcdef12345678"
+
+    }
+]
