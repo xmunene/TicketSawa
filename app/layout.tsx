@@ -27,16 +27,18 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ConvexClientProvider>
-    <ClerkProvider>
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <Header />
-          <SyncUserWithConvex />
-          {children}
-        </body>
-      </html>
-    </ClerkProvider>
-    </ConvexClientProvider>
-  )
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <ConvexClientProvider>
+          <ClerkProvider>
+            <Header />
+            <SyncUserWithConvex />
+            {children}
+          </ClerkProvider>
+        </ConvexClientProvider>
+      </body>
+    </html>
+  );
 }
