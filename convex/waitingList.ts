@@ -40,3 +40,27 @@ export const getQueuePosition = query({
 
     },
 });
+
+export const releaseTicket = mutation({
+  args: {
+    eventId: v.id("events"),
+    waitingListId: v.id("waitingList"),
+  },
+  handler: async (ctx, { waitingListId }) => {
+    const entry = await ctx.db.get(waitingListId);
+
+    if (!entry || entry.status !== WAITING_LIST_STATUS.OFFERED){
+        throw new Error("Entry not found");
+    }
+
+    await ctx.db.patch(waitingListId, {
+        status: WAITING_LIST_STATUS.WAITING,
+    });
+
+    return {
+        
+    }
+
+  },
+
+});

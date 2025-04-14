@@ -6,6 +6,7 @@ import { useUser } from '@clerk/nextjs';
 import { useQuery } from 'convex/react';
 import { CalendarDays, Check, CircleArrowRight, LoaderCircle, MapPin, PencilIcon, StarIcon, Ticket, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 function EventCard({ eventId }: { eventId: Id<'events'> }) {
   const { user } = useUser();
@@ -146,7 +147,7 @@ function EventCard({ eventId }: { eventId: Id<'events'> }) {
     >
       {imageUrl && (
         <div className='relative h-48 w-full'>
-          <img
+          <Image
             src={imageUrl}
             alt={event.name}
             className='object-cover w-full h-full'
