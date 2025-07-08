@@ -130,8 +130,33 @@ export const get = query({
       const event = await ctx.db.get(eventId);
       if (!event) throw new Error("Event not found");
       
-      const { available } = await checkAvailability(ctx, { eventId });
+      // Inline checkAvailability logic
+      const purchasedCount = await ctx.db
+        .query("tickets")
+        .withIndex("by_event", (q) => q.eq("eventId", eventId))
+        .collect()
+        .then(
+          (tickets) =>
+            tickets.filter(
+              (t) =>
+                t.status === TICKET_STATUS.VALID ||
+                t.status === TICKET_STATUS.USED
+            ).length
+        );
+
       const now = Date.now();
+      const activeOffers = await ctx.db
+        .query("waitingList")
+        .withIndex("by_event_status", (q) =>
+          q.eq("eventId", eventId).eq("status", WAITING_LIST_STATUS.OFFERED)
+        )
+        .collect()
+        .then(
+          (entries) => entries.filter((e) => (e.offerExpiresAt ?? 0) > now).length
+        );
+
+      const availableSpots = event.totalTickets - (purchasedCount + activeOffers);
+      const available = availableSpots > 0;
 
       if (available) {
         // If tickets are available, create an offer entry
@@ -167,8 +192,6 @@ export const get = query({
           ? "Ticket offered - you have ${DURATIONS.TICKET_OFFER / (60 * 1000)} to purchase"
           : "Added to waiting list - you'll be notified when a ticket becomes available",
       };
-
     },
-
   })
   
