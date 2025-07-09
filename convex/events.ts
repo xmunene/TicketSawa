@@ -57,7 +57,6 @@ export const get = query({
         purchasedCount,
         activeOffers,
         remainingTickets: Math.max(0, event.totalTickets-totalReserved),
-
       };
     },
   });
@@ -181,7 +180,7 @@ export const get = query({
           userId,
           status: WAITING_LIST_STATUS.WAITING,
         });
-      }
+      } 
 
       return {
         success: true,
@@ -189,7 +188,7 @@ export const get = query({
           ? WAITING_LIST_STATUS.OFFERED // If available, status is offered
           : WAITING_LIST_STATUS.WAITING, // If not available, status is waiting
         message: available
-          ? "Ticket offered - you have ${DURATIONS.TICKET_OFFER / (60 * 1000)} to purchase"
+          ? "Ticket offered - you have 30 minutes to purchase"
           : "Added to waiting list - you'll be notified when a ticket becomes available",
       };
     },
