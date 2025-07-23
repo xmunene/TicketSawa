@@ -40,6 +40,63 @@ export const updateEvent = mutation({
   },
 });
 
+export const getMultipleEventAvailability = query({
+  args: { eventIds: v.array(v.id("events")) },
+  handler: async (ctx, { eventIds }) => {
+    const availabilities = await Promise.all(
+      eventIds.map(async (eventId) => {
+        const event = await ctx.db.get(eventId);
+        if (!event) {
+          // Return default values if event not found
+          return {
+            isSoldOut: false,
+            totalTickets: 0,
+            purchasedCount: 0,
+            activeOffers: 0,
+            remainingTickets: 0,
+          };
+        }
+
+        const purchasedCount = await ctx.db
+          .query("tickets")
+          .withIndex("by_event", (q) => q.eq("eventId", eventId))
+          .collect()
+          .then(
+            (tickets) =>
+              tickets.filter(
+                (t) =>
+                  t.status === TICKET_STATUS.VALID ||
+                  t.status === TICKET_STATUS.USED
+              ).length
+          );
+
+        const now = Date.now();
+        const activeOffers = await ctx.db
+          .query("waitingList")
+          .withIndex("by_event_status", (q) =>
+            q.eq("eventId", eventId).eq("status", WAITING_LIST_STATUS.OFFERED)
+          )
+          .collect()
+          .then(
+            (entries) => entries.filter((e) => (e.offerExpiresAt ?? 0) > now).length
+          );
+        
+        const totalReserved = purchasedCount + activeOffers;
+
+        return {
+          isSoldOut: totalReserved >= event.totalTickets,
+          totalTickets: event.totalTickets,
+          purchasedCount,
+          activeOffers,
+          remainingTickets: Math.max(0, event.totalTickets - totalReserved),
+        };
+      })
+    );
+    
+    return availabilities;
+  },
+});
+
 export const create = mutation({
   args: {
     name: v.string(),

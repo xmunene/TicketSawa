@@ -17,22 +17,21 @@ function EventPage() {
   const { user } = useUser();
   const params = useParams();
   const event = useQuery(api.events.getById, {
-    eventId: params.id as Id<'events'>,
+    eventId: params.id as Id<"events">,
   });
-
-  const availabity = useQuery(api.events.getEventAvailability, {
-    eventId: params.id as Id<'events'>,
+  const availability = useQuery(api.events.getEventAvailability, {
+    eventId: params.id as Id<"events">,
   });
-
   const imageUrl = useStorageUrl(event?.imageStorageId);
 
-  if (!event || !availabity) {
+  if (!event || !availability) {
     return (
-        <div className='min-h-screen flex items-center justify-center'>
-          <Spinner />
-
-        </div>);
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
   }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -50,14 +49,16 @@ function EventPage() {
           )}
 
           <div className="p-8">
-            <div className="grid-grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {/* Left Column - Event Details */}
               <div className="space-y-8">
                 <div>
                   <h1 className="text-4xl font-bold text-gray-900 mb-4">
                     {event.name}
                   </h1>
-                  <p className="text-lg text-gray-600"> {event.description} </p>
+                  <p className="text-lg text-gray-600">{event.description}</p>
                 </div>
+
                 <div className="grid grid-cols-2 gap-6">
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <div className="flex items-center text-gray-600 mb-1">
@@ -68,6 +69,7 @@ function EventPage() {
                       {new Date(event.eventDate).toLocaleDateString()}
                     </p>
                   </div>
+
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <div className="flex items-center text-gray-600 mb-1">
                       <MapPin className="w-5 h-5 mr-2 text-blue-600" />
@@ -75,12 +77,13 @@ function EventPage() {
                     </div>
                     <p className="text-gray-900">{event.location}</p>
                   </div>
+
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
                     <div className="flex items-center text-gray-600 mb-1">
                       <Ticket className="w-5 h-5 mr-2 text-blue-600" />
                       <span className="text-sm font-medium">Price</span>
                     </div>
-                    <p className="text-gray-900">Ksh{event.price.toFixed(2)}</p>
+                    <p className="text-gray-900">KES {event.price.toFixed(2)}</p>
                   </div>
 
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
@@ -89,12 +92,13 @@ function EventPage() {
                       <span className="text-sm font-medium">Availability</span>
                     </div>
                     <p className="text-gray-900">
-                      {availabity.totalTickets - availabity.purchasedCount}{" "}
-                      / {availabity.totalTickets} left
+                      {availability.totalTickets - availability.purchasedCount}{" "}
+                      / {availability.totalTickets} left
                     </p>
                   </div>
                 </div>
 
+                {/* Additional Event Information */}
                 <div className="bg-blue-50 border border-blue-100 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-blue-900 mb-2">
                     Event Information
@@ -106,7 +110,8 @@ function EventPage() {
                   </ul>
                 </div>
               </div>
-              
+
+              {/* Right Column - Ticket Purchase Card */}
               <div>
                 <div className="sticky top-8 space-y-4">
                   <EventCard eventId={params.id as Id<"events">} />
@@ -125,14 +130,11 @@ function EventPage() {
                   )}
                 </div>
               </div>
-              </div>
-              <div>
-              </div>
             </div>
           </div>
-        </div>   
+        </div>
+      </div>
     </div>
-    
   );
 }
 

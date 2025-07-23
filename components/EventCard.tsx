@@ -1,6 +1,7 @@
-'use client'
+'use client';
+
 import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel'
+import { Id } from '@/convex/_generated/dataModel';
 import { useStorageUrl } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
 import { useQuery } from 'convex/react';
@@ -79,6 +80,7 @@ function EventCard({ eventId }: { eventId: Id<'events'> }) {
       </div>
     );
   };
+
   const renderTicketStatus = () => {
     if (!user) return null;
     if (isEventOwner) {
@@ -152,7 +154,7 @@ function EventCard({ eventId }: { eventId: Id<'events'> }) {
             src={imageUrl}
             alt={event.name}
             fill
-            className='object-cover w-full h-full'
+            className='object-cover'
             priority
           />
           <div className='absolute inset-0 bg-gradient-to-t from-black/50 to-transparent' />
@@ -161,7 +163,7 @@ function EventCard({ eventId }: { eventId: Id<'events'> }) {
 
       <div className={`p-6 ${imageUrl ? "relative" : ""}`}>
         <div className="flex justify-between items-start">
-        <div>
+          <div>
             <div className="flex flex-col items-start gap-2">
               {isEventOwner && (
                 <span className="inline-flex items-center gap-1 bg-blue-600/90 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -176,10 +178,9 @@ function EventCard({ eventId }: { eventId: Id<'events'> }) {
                 Past Event
               </span>
             )}
-          
-        </div>
+          </div>
 
-        <div className="flex flex-col items-end gap-2 ml-4">
+          <div className="flex flex-col items-end gap-2 ml-4">
             <span
               className={`px-4 py-1.5 font-semibold rounded-full ${
                 isPastEvent
@@ -194,14 +195,14 @@ function EventCard({ eventId }: { eventId: Id<'events'> }) {
                 Sold Out
               </span>
             )}
-        </div>
+          </div>
         </div>
 
-        <div className="mt-4 space-y-3">
-          <div className="flex items-center text-gray-600">
-            <MapPin className="w-4 h-4 mr-2" />
-            <span>{event.location}</span>
-          </div>
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center text-gray-600">
+              <MapPin className="w-4 h-4 mr-2" />
+              <span>{event.location}</span>
+            </div>
 
           <div className="flex items-center text-gray-600">
             <CalendarDays className="w-4 h-4 mr-2" />

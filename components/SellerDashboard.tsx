@@ -20,12 +20,22 @@ export default function SellerDashboard() {
     userId: user?.id || "",
   });
 
-  if (sellerEvents === undefined || sellerTicketStats === undefined) {
+  // Get availability for all events
+  const eventAvailabilities = useQuery(api.events.getMultipleEventAvailability, {
+    eventIds: sellerEvents?.map(event => event._id) || [],
+  });
+
+  if (sellerEvents === undefined || sellerTicketStats === undefined || eventAvailabilities === undefined) {
     return <Spinner />;
   }
 
   const totalEvents = sellerEvents?.length || 0;
-  const totalTicketsAvailable = sellerTicketStats?.totalAvailable || 0;
+  
+  // Calculate total available tickets across all events
+  const totalTicketsAvailable = eventAvailabilities?.reduce((sum, availability) => {
+    return sum + (availability.remainingTickets || 0);
+  }, 0) || 0;
+  
   const totalTicketsSold = sellerTicketStats?.totalSold || 0;
   const totalRevenue = sellerTicketStats?.totalRevenue || 0;
   return (
@@ -153,10 +163,14 @@ export default function SellerDashboard() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {sellerEvents.map((event) => {
+                  {sellerEvents.map((event, index) => {
                     const eventStats = sellerTicketStats?.eventStats?.find(
                       (stat) => stat.eventId === event._id
                     );
+                    
+                    const availability = eventAvailabilities?.[index];
+                    const availableTickets = availability ? 
+                      (availability.totalTickets - availability.purchasedCount) : 0;
                     
                     return (
                       <tr key={event._id} className="hover:bg-gray-50">
@@ -172,16 +186,16 @@ export default function SellerDashboard() {
                           {new Date(event.eventDate).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {eventStats?.totalTickets || 0}
+                          {availability?.totalTickets || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {eventStats?.sold || 0}
+                            {availability?.purchasedCount || 0}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {eventStats?.available || 0}
+                            {availability?.remainingTickets || 0}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -189,7 +203,7 @@ export default function SellerDashboard() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <Link
-                            href={`/seller/events/${event._id}`}
+                            href={`/seller/events/${event._id}/edit`}
                             className="text-blue-600 hover:text-blue-900 mr-3"
                           >
                             Edit
