@@ -174,7 +174,7 @@ function EventCard({ eventId }: { eventId: Id<'events'> }) {
                 Past Event
               </span>
             )}
-          </div>
+          
         </div>
 
         <div className="flex flex-col items-end gap-2 ml-4">
@@ -192,6 +192,7 @@ function EventCard({ eventId }: { eventId: Id<'events'> }) {
                 Sold Out
               </span>
             )}
+        </div>
         </div>
 
         <div className="mt-4 space-y-3">
