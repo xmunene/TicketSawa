@@ -103,6 +103,22 @@ export const get = query({
   },
 });
 
+export const getEventsByUserId = query({
+  args: { userId: v.string() },
+  handler: async (ctx, { userId }) => {
+    return await ctx.db
+      .query("events")
+      .filter((q) => 
+        q.and(
+          q.eq(q.field("userId"), userId),
+          q.eq(q.field("is_cancelled"), undefined)
+        )
+      )
+      .order("desc")
+      .collect();
+  },
+});
+
   export const joinWaitingList = mutation({
     args: {
         eventId: v.id("events"),
