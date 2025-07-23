@@ -151,7 +151,9 @@ function EventCard({ eventId }: { eventId: Id<'events'> }) {
           <Image
             src={imageUrl}
             alt={event.name}
+            fill
             className='object-cover w-full h-full'
+            priority
           />
           <div className='absolute inset-0 bg-gradient-to-t from-black/50 to-transparent' />
         </div>
