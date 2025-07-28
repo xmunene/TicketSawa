@@ -7,7 +7,7 @@ import { useMutation, useQuery } from "convex/react";
 import { Ticket } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner"; // Assuming you're using sonner for notifications
+import { toast } from "sonner";
 import ReleaseTicket from "./ReleaseTicket";
 
 

@@ -15,10 +15,12 @@ export default function SellerDashboard() {
   const { user } = useUser();
   const [deletingEventId, setDeletingEventId] = useState<Id<"events"> | null>(null);
 
-  const sellerEvents = useQuery(api.events.getEventsByUserId, {
+  // Use the same query as SellerEventList to get events with metrics
+  const sellerEvents = useQuery(api.events.getSellerEvents, {
     userId: user?.id || "",
   });
   
+  // Keep the original query for backward compatibility if needed
   const sellerTicketStats = useQuery(api.tickets.getSellerTicketStats, {
     userId: user?.id || "",
   });
@@ -42,8 +44,19 @@ export default function SellerDashboard() {
     return sum + (availability.remainingTickets || 0);
   }, 0) || 0;
   
-  const totalTicketsSold = sellerTicketStats?.totalSold || 0;
-  const totalRevenue = sellerTicketStats?.totalRevenue || 0;
+  // Calculate total tickets sold from events with metrics
+  const totalTicketsSold = sellerEvents?.reduce((sum, event) => {
+    return sum + (event.metrics?.soldTickets || 0);
+  }, 0) || 0;
+  
+  // Calculate total revenue from events with metrics (matching SellerEventList)
+  const totalRevenue = sellerEvents?.reduce((sum, event) => {
+    if (event.is_cancelled) {
+      // For cancelled events, don't count towards revenue
+      return sum;
+    }
+    return sum + (event.metrics?.revenue || 0);
+  }, 0) || 0;
 
   const handleDeleteEvent = async (eventId: Id<"events">, eventName: string) => {
     const isConfirmed = window.confirm(
@@ -144,13 +157,6 @@ export default function SellerDashboard() {
               <CalendarDays className="w-5 h-5" />
               Manage Events
             </Link>
-            <Link
-              href="/seller/analytics"
-              className="flex items-center gap-2 bg-green-100 text-green-700 px-6 py-3 rounded-lg hover:bg-green-200 transition-colors"
-            >
-              <TrendingUp className="w-5 h-5" />
-              View Analytics
-            </Link>
           </div>
         </div>
 
@@ -173,6 +179,9 @@ export default function SellerDashboard() {
                       Date
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Total Tickets
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -191,13 +200,8 @@ export default function SellerDashboard() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {sellerEvents.map((event, index) => {
-                    const eventStats = sellerTicketStats?.eventStats?.find(
-                      (stat) => stat.eventId === event._id
-                    );
-                    
                     const availability = eventAvailabilities?.[index];
-                    const availableTickets = availability ? 
-                      (availability.totalTickets - availability.purchasedCount) : 0;
+                    const isPastEvent = event.eventDate < Date.now();
                     
                     return (
                       <tr key={event._id} className="hover:bg-gray-50">
@@ -212,36 +216,52 @@ export default function SellerDashboard() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {new Date(event.eventDate).toLocaleDateString()}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            event.is_cancelled 
+                              ? "bg-red-100 text-red-800"
+                              : isPastEvent
+                              ? "bg-gray-100 text-gray-800"
+                              : "bg-green-100 text-green-800"
+                          }`}>
+                            {event.is_cancelled ? "Cancelled" : isPastEvent ? "Ended" : "Active"}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {availability?.totalTickets || 0}
+                          {availability?.totalTickets || event.totalTickets || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {availability?.purchasedCount || 0}
+                            {event.is_cancelled 
+                              ? `${event.metrics?.refundedTickets || 0} refunded`
+                              : event.metrics?.soldTickets || 0
+                            }
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {availability?.remainingTickets || 0}
+                            {event.is_cancelled ? 0 : (availability?.remainingTickets || 0)}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          KES {(eventStats?.revenue || 0).toLocaleString()}
+                          KES {(event.is_cancelled 
+                            ? (event.metrics?.refundedTickets || 0) * (event.price || 0)
+                            : (event.metrics?.revenue || 0)
+                          ).toLocaleString()}
+                          {event.is_cancelled && (
+                            <div className="text-xs text-red-600">Refunded</div>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex items-center gap-3">
-                            <Link
-                              href={`/seller/events/${event._id}/edit`}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              Edit
-                            </Link>
-                            <Link
-                              href={`/seller/events/${event._id}/analytics`}
-                              className="text-green-600 hover:text-green-900"
-                            >
-                              Analytics
-                            </Link>
+                            {!isPastEvent && !event.is_cancelled && (
+                              <Link
+                                href={`/seller/events/${event._id}/edit`}
+                                className="text-blue-600 hover:text-blue-900"
+                              >
+                                Edit
+                              </Link>
+                            )}
                             <button
                               onClick={() => handleDeleteEvent(event._id, event.name)}
                               disabled={deletingEventId === event._id}

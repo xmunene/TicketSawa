@@ -143,7 +143,7 @@ function Ticket({ ticketId }: { ticketId: Id<"tickets"> }) {
           ) : (
             <ul className="text-sm text-gray-600 space-y-1">
               <li>• Please arrive at least 30 minutes before the event</li>
-              <li>• Have your ticket QR code ready for scanning</li>
+              <li>• Please carry this virtual ticket with you to the event</li>
               <li>• This ticket is non-transferable</li>
             </ul>
           )}
