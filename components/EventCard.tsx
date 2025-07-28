@@ -143,7 +143,7 @@ function EventCard({ eventId }: { eventId: Id<'events'> }) {
 
   return (
     <div
-    onClick={() => router.push(`/events/${eventId}`)}
+    onClick={() => router.push(`/event/${eventId}`)}
     className={`bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer overflow-hidden relative ${ 
       isPastEvent ? "opacity-75 hover:opacity-100" : ""
     }`}

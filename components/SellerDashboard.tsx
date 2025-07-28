@@ -1,16 +1,19 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import Spinner from "./Spinner";
-import { CalendarDays, Plus, TicketIcon, TrendingUp, Users } from "lucide-react";
+import { CalendarDays, Plus, TicketIcon, TrendingUp, Users, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function SellerDashboard() {
   const router = useRouter();
   const { user } = useUser();
+  const [deletingEventId, setDeletingEventId] = useState<Id<"events"> | null>(null);
 
   const sellerEvents = useQuery(api.events.getEventsByUserId, {
     userId: user?.id || "",
@@ -25,6 +28,9 @@ export default function SellerDashboard() {
     eventIds: sellerEvents?.map(event => event._id) || [],
   });
 
+  // Delete event mutation
+  const deleteEvent = useMutation(api.events.deleteEvent);
+
   if (sellerEvents === undefined || sellerTicketStats === undefined || eventAvailabilities === undefined) {
     return <Spinner />;
   }
@@ -38,6 +44,27 @@ export default function SellerDashboard() {
   
   const totalTicketsSold = sellerTicketStats?.totalSold || 0;
   const totalRevenue = sellerTicketStats?.totalRevenue || 0;
+
+  const handleDeleteEvent = async (eventId: Id<"events">, eventName: string) => {
+    const isConfirmed = window.confirm(
+      `Are you sure you want to delete "${eventName}"? This action cannot be undone and will remove all associated tickets and data.`
+    );
+    
+    if (!isConfirmed) return;
+
+    try {
+      setDeletingEventId(eventId);
+      await deleteEvent({ eventId });
+      // Optionally show a success message
+      alert("Event deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      alert("Failed to delete event. Please try again.");
+    } finally {
+      setDeletingEventId(null);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6">
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -86,7 +113,7 @@ export default function SellerDashboard() {
           </div>
 
           {/* Total Revenue */}
-                          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-orange-100 text-sm">Total Revenue</p>
@@ -202,18 +229,32 @@ export default function SellerDashboard() {
                           KES {(eventStats?.revenue || 0).toLocaleString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <Link
-                            href={`/seller/events/${event._id}/edit`}
-                            className="text-blue-600 hover:text-blue-900 mr-3"
-                          >
-                            Edit
-                          </Link>
-                          <Link
-                            href={`/seller/events/${event._id}/analytics`}
-                            className="text-green-600 hover:text-green-900"
-                          >
-                            Analytics
-                          </Link>
+                          <div className="flex items-center gap-3">
+                            <Link
+                              href={`/seller/events/${event._id}/edit`}
+                              className="text-blue-600 hover:text-blue-900"
+                            >
+                              Edit
+                            </Link>
+                            <Link
+                              href={`/seller/events/${event._id}/analytics`}
+                              className="text-green-600 hover:text-green-900"
+                            >
+                              Analytics
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteEvent(event._id, event.name)}
+                              disabled={deletingEventId === event._id}
+                              className="flex items-center gap-1 text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {deletingEventId === event._id ? (
+                                <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                              {deletingEventId === event._id ? "Deleting..." : "Delete"}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
