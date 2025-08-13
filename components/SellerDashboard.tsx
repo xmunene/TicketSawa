@@ -9,6 +9,8 @@ import Spinner from "./Spinner";
 import { CalendarDays, Plus, TicketIcon, TrendingUp, Users, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
+
 
 export default function SellerDashboard() {
   const router = useRouter();
@@ -59,20 +61,53 @@ export default function SellerDashboard() {
   }, 0) || 0;
 
   const handleDeleteEvent = async (eventId: Id<"events">, eventName: string) => {
+    // Find the event to check if it has sold tickets
+    const eventToDelete = sellerEvents?.find(event => event._id === eventId);
+    const soldTickets = eventToDelete?.metrics?.soldTickets || 0;
+    
+    // Check if event has sold tickets
+    if (soldTickets > 0) {
+      toast.error("Cannot cancel event. Refund bought tickets to proceed. ", {
+        duration: 5000,
+      });
+      return;
+    }
+
     const isConfirmed = window.confirm(
-      `Are you sure you want to delete "${eventName}"? This action cannot be undone and will remove all associated tickets and data.`
+      `Are you sure you want to cancel "${eventName}"? This action cannot be undone and will remove all associated data.`
     );
     
     if (!isConfirmed) return;
 
     try {
       setDeletingEventId(eventId);
+      
+      // Show loading toast
+      const loadingToast = toast.loading(`Cancelling "${eventName}"...`);
+      
       await deleteEvent({ eventId });
-      // Optionally show a success message
-      alert("Event deleted successfully!");
+      
+      // Dismiss loading toast and show success
+      toast.dismiss(loadingToast);
+      toast.success("Event cancelled successfully!", {
+        description: `"${eventName}" has been permanently deleted.`,
+        duration: 4000,
+      });
+      
     } catch (error) {
-      console.error("Error deleting event:", error);
-      alert("Failed to delete event. Please try again.");
+      console.error("Error cancelling event:", error);
+      
+      // Show error toast with specific message
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      toast.error("Failed to cancel event", {
+        description: `Could not cancel "${eventName}". ${errorMessage}`,
+        duration: 5000,
+        action: {
+          label: "Retry",
+          onClick: () => handleDeleteEvent(eventId, eventName),
+        },
+      });
+      
     } finally {
       setDeletingEventId(null);
     }
@@ -272,7 +307,7 @@ export default function SellerDashboard() {
                               ) : (
                                 <Trash2 className="w-4 h-4" />
                               )}
-                              {deletingEventId === event._id ? "Deleting..." : "Delete"}
+                              {deletingEventId === event._id ? "Deleting..." : "Cancel"}
                             </button>
                           </div>
                         </td>

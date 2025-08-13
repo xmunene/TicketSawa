@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import logo from "@/images/TicketSawa Logo.png";
+import logo from "@/images/Logo3.png";
 import { Sign } from "crypto";
 import { SignedIn, SignedOut, SignIn, SignInButton, UserButton } from "@clerk/nextjs";
 import SearchBar from "./SearchBar";
@@ -16,7 +16,7 @@ function Header() {
                     alt="Logo"
                     width={100}
                     height={100}
-                    className="w-10 lg:w-15"
+                    className="w-10 lg:w-20"
                 />
             </Link>
             <div className="lg:hidden">

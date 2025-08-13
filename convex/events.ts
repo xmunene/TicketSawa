@@ -78,7 +78,6 @@ export const deleteEvent = mutation({
       );
     }
 
-    // Delete all tickets associated with this event (including cancelled/refunded ones)
     const allTickets = await ctx.db
       .query("tickets")
       .withIndex("by_event", (q) => q.eq("eventId", eventId))
@@ -323,7 +322,6 @@ export const getEventsByUserId = query({
       const event = await ctx.db.get(eventId);
       if (!event) throw new Error("Event not found");
       
-      // Inline checkAvailability logic
       const purchasedCount = await ctx.db
         .query("tickets")
         .withIndex("by_event", (q) => q.eq("eventId", eventId))
@@ -352,12 +350,11 @@ export const getEventsByUserId = query({
       const available = availableSpots > 0;
 
       if (available) {
-        // If tickets are available, create an offer entry
         const waitingListId = await ctx.db.insert("waitingList", {
           eventId,
           userId,
-          status: WAITING_LIST_STATUS.OFFERED, // Mark as offered
-          offerExpiresAt: now + DURATIONS.TICKET_OFFER, // Set expiration time
+          status: WAITING_LIST_STATUS.OFFERED, 
+          offerExpiresAt: now + DURATIONS.TICKET_OFFER,
         });
 
         await ctx.scheduler.runAfter(
@@ -379,10 +376,10 @@ export const getEventsByUserId = query({
       return {
         success: true,
         status: available
-          ? WAITING_LIST_STATUS.OFFERED // If available, status is offered
-          : WAITING_LIST_STATUS.WAITING, // If not available, status is waiting
+          ? WAITING_LIST_STATUS.OFFERED
+          : WAITING_LIST_STATUS.WAITING,
         message: available
-          ? "Ticket offered - you have 1 minute to purchase"
+          ? "Ticket offered - you have 30 Minutes to purchase"
           : "Added to waiting list - you'll be notified when a ticket becomes available",
       };
     },

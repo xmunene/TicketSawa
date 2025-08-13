@@ -146,10 +146,7 @@ const formSchema = z.object({
                 });
               }
               toast(
-                "Event updated",
-                {
-                  description: "Your event has been successfully updated.",
-                }
+                "Event updated. Your event has been successfully updated.",
               );
 
               router.push(`/event/${initialData._id}`);
@@ -279,7 +276,7 @@ const formSchema = z.object({
                 <FormControl>
                   <div className="relative">
                     <span className="absolute left-2 top-1/2 -translate-y-1/2">
-                      Ksh
+                      KES
                     </span>
                     <Input
                       type="number"

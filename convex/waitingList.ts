@@ -158,7 +158,7 @@ export const releaseTicket = mutation({
     eventId: v.id("events"),
     waitingListId: v.id("waitingList"),
   },
-  handler: async (ctx, { waitingListId }) => {
+  handler: async (ctx, { eventId, waitingListId }) => {
     const entry = await ctx.db.get(waitingListId);
 
     if (!entry || entry.status !== WAITING_LIST_STATUS.OFFERED){
@@ -166,7 +166,7 @@ export const releaseTicket = mutation({
     }
 
     await ctx.db.patch(waitingListId, {
-        status: WAITING_LIST_STATUS.WAITING,
+        status: WAITING_LIST_STATUS.EXPIRED,
     });
 
     await ctx.runMutation(api.waitingList.processQueue, { eventId: entry.eventId });

@@ -19,7 +19,7 @@ function PurchaseTicket({ eventId }: { eventId: Id<'events'> }) {
         userId: user?.id ?? "",
     });
 
-    // Add mutation for purchasing ticket
+    
     const purchaseTicket = useMutation(api.events.purchaseTicket);
 
     const [timeRemaining, setTimeRemaining] = useState("");
@@ -64,7 +64,7 @@ function PurchaseTicket({ eventId }: { eventId: Id<'events'> }) {
         try {
             setIsLoading(true);
             
-            // Call your backend API to purchase the ticket
+            
             const result = await purchaseTicket({
               eventId: eventId,
               userId: user.id,
@@ -75,7 +75,6 @@ function PurchaseTicket({ eventId }: { eventId: Id<'events'> }) {
               },
             });
 
-            // Type guard to ensure result has the expected shape
             if (
                 result &&
                 typeof result === "object" &&
@@ -93,7 +92,6 @@ function PurchaseTicket({ eventId }: { eventId: Id<'events'> }) {
                     toast.error("Ticket ID not found. Please contact support.");
                 }
             } else {
-                // Safely handle possible error property on result
                 const errorMessage =
                     typeof result === "object" && result !== null && "error" in result
                         ? (result as { error?: string }).error
