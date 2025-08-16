@@ -3,13 +3,11 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { Ticket } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import ReleaseTicket from "./ReleaseTicket";
-
 
 function PurchaseTicket({ eventId }: { eventId: Id<'events'> }) {
     const router = useRouter();
@@ -19,11 +17,7 @@ function PurchaseTicket({ eventId }: { eventId: Id<'events'> }) {
         userId: user?.id ?? "",
     });
 
-    
-    const purchaseTicket = useMutation(api.events.purchaseTicket);
-
     const [timeRemaining, setTimeRemaining] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
 
     const offerExpiresAt = queuePosition?.offerExpiresAt ?? 0;
     const isExpired = Date.now() > offerExpiresAt;
@@ -55,55 +49,13 @@ function PurchaseTicket({ eventId }: { eventId: Id<'events'> }) {
         return () => clearInterval(interval);
     }, [offerExpiresAt, isExpired]);
 
-    const handlePurchase = async () => {
+    const handleGoToPayment = () => {
         if (!user || !queuePosition) {
-            toast.error("User authentication required");
             return;
         }
 
-        try {
-            setIsLoading(true);
-            
-            
-            const result = await purchaseTicket({
-              eventId: eventId,
-              userId: user.id,
-              waitingListId: queuePosition._id,
-              paymentInfo: {
-                paymentIntentId: sessionStorage.payment_intent as string,
-                amount: sessionStorage.amount_total ?? 0,
-              },
-            });
-
-            if (
-                result &&
-                typeof result === "object" &&
-                "success" in result &&
-                (result as any).success
-            ) {
-                toast.success("Ticket purchased successfully!");
-                console.log("Ticket purchase result:", result);
-                
-                // Redirect to success page or ticket details
-                const ticketId = (result as any)?.ticketId;
-                if (ticketId) {
-                    router.push(`/tickets/${ticketId}`);
-                } else {
-                    toast.error("Ticket ID not found. Please contact support.");
-                }
-            } else {
-                const errorMessage =
-                    typeof result === "object" && result !== null && "error" in result
-                        ? (result as { error?: string }).error
-                        : undefined;
-                toast.error(errorMessage || "Ticket purchased successfully!");
-            }
-        } catch (error) {
-            console.error("Purchase error:", error);
-            toast.error("An error occurred while purchasing your ticket");
-        } finally {
-            setIsLoading(false);
-        }
+        // Navigate to the payment page
+        router.push(`/payment/${eventId}`);
     };
 
     if (!user || !queuePosition || queuePosition.status !== "offered") {
@@ -137,13 +89,11 @@ function PurchaseTicket({ eventId }: { eventId: Id<'events'> }) {
                 </div>
 
                 <button
-                    onClick={handlePurchase}
-                    disabled={isExpired || isLoading}
+                    onClick={handleGoToPayment}
+                    disabled={isExpired}
                     className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-4 rounded-lg font-bold shadow-md hover:from-amber-600 hover:to-amber-700 transform hover:scale-[1.02] transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 text-lg"
                 >
-                    {isLoading
-                        ? "Processing Purchase..."
-                        : "Purchase Your Ticket Now →"}
+                    {isExpired ? "Reservation Expired" : "Continue to Payment →"}
                 </button>
 
                 <div className="mt-4">
