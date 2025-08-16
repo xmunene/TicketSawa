@@ -7,7 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { redirect, useParams } from "next/navigation";
 import Ticket from "@/components/Ticket";
 import Link from "next/link";
-import { ArrowLeft, Download, Share2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useEffect } from "react";
 
 function MyTicket() {

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import logo from "@/images/Logo3.png";
-import { Sign } from "crypto";
-import { SignedIn, SignedOut, SignIn, SignInButton, UserButton } from "@clerk/nextjs";
+//import { Sign } from "crypto";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import SearchBar from "./SearchBar";
 
 function Header() {

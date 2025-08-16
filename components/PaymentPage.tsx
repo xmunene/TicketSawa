@@ -176,7 +176,7 @@ export default function PaymentPage({ eventId }: PaymentPageProps) {
 
       const mockPaymentIntentId = `pi_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      const result = await purchaseTicket({
+      await purchaseTicket({
         eventId: eventId,
         userId: user.id,
         waitingListId: queuePosition._id,
@@ -198,6 +198,13 @@ export default function PaymentPage({ eventId }: PaymentPageProps) {
     }
   };
 
+  useEffect(() => {
+    if (user !== undefined && queuePosition !== undefined && 
+        (!user || !queuePosition || queuePosition.status !== "offered")) {
+      router.push(`/event/${eventId}`);
+    }
+  }, [user, queuePosition, eventId, router]);
+
   if (!eventId || eventId === 'undefined' || typeof eventId !== 'string' || eventId.length === 0) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen">
@@ -207,13 +214,6 @@ export default function PaymentPage({ eventId }: PaymentPageProps) {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (user !== undefined && queuePosition !== undefined && 
-        (!user || !queuePosition || queuePosition.status !== "offered")) {
-      router.push(`/event/${eventId}`);
-    }
-  }, [user, queuePosition, eventId, router]);
 
   if (user === undefined || queuePosition === undefined) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;

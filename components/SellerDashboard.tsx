@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 
 export default function SellerDashboard() {
-  const router = useRouter();
+  useRouter();
   const { user } = useUser();
   const [deletingEventId, setDeletingEventId] = useState<Id<"events"> | null>(null);
 

@@ -115,7 +115,7 @@ function Ticket({ ticketId }: { ticketId: Id<"tickets"> }) {
             </div>
           </div>
 
-          {/* Right Column - QR Code 
+          {/* Right Column - QR Code */}
           <div className="flex flex-col items-center justify-center border-l border-gray-200 pl-6">
             <div
               className={`bg-gray-100 p-4 rounded-lg ${ticket.event.is_cancelled ? "opacity-50" : ""}`}
@@ -126,7 +126,6 @@ function Ticket({ ticketId }: { ticketId: Id<"tickets"> }) {
               Ticket ID: {ticket._id}
             </p>
           </div>
-          */}
         </div>
         
 
