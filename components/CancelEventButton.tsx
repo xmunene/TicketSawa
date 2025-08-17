@@ -14,7 +14,6 @@ export default function CancelEventButton({
   eventId: Id<"events">;
 }) {
   const [isCancelling, setIsCancelling] = useState(false);
-  const { toast } = useToast();
   const router = useRouter();
   const cancelEvent = useMutation(api.events.cancelEvent);
 
@@ -30,18 +29,11 @@ export default function CancelEventButton({
     setIsCancelling(true);
     try {
       await cancelEvent({ eventId });
-      toast({
-        title: "Event cancelled",
-        description: "All tickets have been refunded successfully.",
-      });
+      toast.success("Event cancelled - All tickets have been refunded successfully.");
       router.push("/seller/events");
     } catch (error) {
       console.error("Failed to cancel event:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to cancel event. Please try again.",
-      });
+      toast.error("Failed to cancel event. Please try again.");
     } finally {
       setIsCancelling(false);
     }
@@ -57,8 +49,4 @@ export default function CancelEventButton({
       <span>{isCancelling ? "Processing..." : "Cancel Event"}</span>
     </button>
   );
-}
-
-function useToast(): { toast: any; } {
-    throw new Error("Function not implemented.");
 }

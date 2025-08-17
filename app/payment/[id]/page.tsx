@@ -2,16 +2,19 @@ import PaymentPage from "@/components/PaymentPage";
 import { Id } from "@/convex/_generated/dataModel";
 
 interface PaymentPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function Payment({ params }: PaymentPageProps) {
+export default async function Payment({ params }: PaymentPageProps) {
+  // Await the params since it's now a Promise
+  const { id } = await params;
+  
   // Validate eventId before passing to component
-  if (!params.id) {
+  if (!id) {
     return <div>Invalid event ID</div>;
   }
-  
-  return <PaymentPage eventId={params.id as Id<'events'>} />;
+ 
+  return <PaymentPage eventId={id as Id<'events'>} />;
 }

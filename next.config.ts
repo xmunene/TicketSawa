@@ -7,7 +7,11 @@ const nextConfig: NextConfig = {
       {
         hostname: "hushed-zebra-896.convex.cloud",
         protocol: "https",
-      }
+      },
+      {
+        hostname:"greedy-bee-978.convex.cloud/api/storage",
+        protocol:"https",
+      },
     ]
   }
 };
