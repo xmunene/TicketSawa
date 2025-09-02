@@ -17,22 +17,18 @@ export default function SellerDashboard() {
   const { user } = useUser();
   const [deletingEventId, setDeletingEventId] = useState<Id<"events"> | null>(null);
 
-  // Use the same query as SellerEventList to get events with metrics
   const sellerEvents = useQuery(api.events.getSellerEvents, {
     userId: user?.id || "",
   });
   
-  // Keep the original query for backward compatibility if needed
   const sellerTicketStats = useQuery(api.tickets.getSellerTicketStats, {
     userId: user?.id || "",
   });
 
-  // Get availability for all events
   const eventAvailabilities = useQuery(api.events.getMultipleEventAvailability, {
     eventIds: sellerEvents?.map(event => event._id) || [],
   });
 
-  // Delete event mutation
   const deleteEvent = useMutation(api.events.deleteEvent);
 
   if (sellerEvents === undefined || sellerTicketStats === undefined || eventAvailabilities === undefined) {
@@ -41,31 +37,25 @@ export default function SellerDashboard() {
 
   const totalEvents = sellerEvents?.length || 0;
   
-  // Calculate total available tickets across all events
   const totalTicketsAvailable = eventAvailabilities?.reduce((sum, availability) => {
     return sum + (availability.remainingTickets || 0);
   }, 0) || 0;
   
-  // Calculate total tickets sold from events with metrics
   const totalTicketsSold = sellerEvents?.reduce((sum, event) => {
     return sum + (event.metrics?.soldTickets || 0);
   }, 0) || 0;
   
-  // Calculate total revenue from events with metrics (matching SellerEventList)
   const totalRevenue = sellerEvents?.reduce((sum, event) => {
     if (event.is_cancelled) {
-      // For cancelled events, don't count towards revenue
       return sum;
     }
     return sum + (event.metrics?.revenue || 0);
   }, 0) || 0;
 
   const handleDeleteEvent = async (eventId: Id<"events">, eventName: string) => {
-    // Find the event to check if it has sold tickets
     const eventToDelete = sellerEvents?.find(event => event._id === eventId);
     const soldTickets = eventToDelete?.metrics?.soldTickets || 0;
     
-    // Check if event has sold tickets
     if (soldTickets > 0) {
       toast.error("Cannot cancel event. Refund bought tickets to proceed. ", {
         duration: 5000,
@@ -82,12 +72,10 @@ export default function SellerDashboard() {
     try {
       setDeletingEventId(eventId);
       
-      // Show loading toast
       const loadingToast = toast.loading(`Cancelling "${eventName}"...`);
       
       await deleteEvent({ eventId });
       
-      // Dismiss loading toast and show success
       toast.dismiss(loadingToast);
       toast.success("Event cancelled successfully!", {
         description: `"${eventName}" has been permanently deleted.`,
@@ -97,7 +85,6 @@ export default function SellerDashboard() {
     } catch (error) {
       console.error("Error cancelling event:", error);
       
-      // Show error toast with specific message
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
       toast.error("Failed to cancel event", {
         description: `Could not cancel "${eventName}". ${errorMessage}`,

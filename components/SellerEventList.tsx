@@ -14,7 +14,6 @@ import {
 import Link from "next/link";
 import { useStorageUrl } from "@/lib/utils";
 import Image from "next/image";
-//import CancelEventButton from "./CancelEventButton";
 import { Doc } from "@/convex/_generated/dataModel";
 import { Metrics } from "@/convex/events";
 

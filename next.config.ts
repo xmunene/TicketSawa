@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
         protocol: "https",
       },
       {
-        hostname:"greedy-bee-978.convex.cloud/api/storage",
+        hostname:"greedy-bee-978.convex.cloud",
         protocol:"https",
       },
     ]
